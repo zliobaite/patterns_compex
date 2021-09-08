@@ -1,0 +1,21 @@
+html, body {
+  font-family: sans-serif;
+  margin: 0px 40px 0px 40px;
+  padding: 0px;
+  color: #6b6b6b;
+  background-color: #e7e7e7;
+}
+#main {
+  vertical-align: top;
+  padding-top: 50px;
+}
+#graph {
+  vertical-align: top;
+  align: center;
+  margin: 10px;
+  padding-bottom: 10px;
+}
+#choice-row {
+  margin: 10px;
+}
+

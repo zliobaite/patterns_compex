@@ -1,0 +1,102 @@
+\documentclass{article} % 
+\usepackage[utf8]{inputenc}
+\usepackage{xifthen}
+\usepackage{color}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows, arrows.meta}
+\usepackage{pgfplots}
+
+\definecolor{mid-gray}{gray}{0.5}
+%%% yellow-brown
+\definecolor{clsAa}{HTML}{FEC44F}
+\definecolor{clsZa}{HTML}{662506}
+%%% grey light-dark
+\definecolor{clsAb}{HTML}{DDDDDD}
+\definecolor{clsZb}{HTML}{666666}
+
+
+\pgfplotsset{compat=1.17,
+  fbyf/.style={height=.265\textwidth, width=.265\textwidth,
+    ytick pos=left,
+    xtick pos=bottom,
+    tick align=outside,
+    x label style={
+        align=center,text width=3cm, %
+      },
+    y label style={
+        align=center,text width=3cm, %
+      },
+      major tick length=2pt,
+      tick style={black, semithick},
+      tick label style={black, font=\scriptsize} %
+  },%
+  hrz/.style={dotted, mid-gray, line width=.5pt}, %
+}
+
+\tikzset{
+  tsc node/.style={draw=none, circle, inner sep=1.2pt}, %
+  mrk node/.style={circle, inner sep=1.2pt}, %
+  tsc path/.style={-{Stealth[length=4pt, width=3pt]}, line width=.5pt, shorten <=.4pt, shorten >=.4pt}, %
+  mrk nodea/.style={circle, inner sep=1.pt}, %
+  tsc patha/.style={-{Stealth[length=4pt, width=3pt]}, line width=.5pt, shorten <=.4pt, shorten >=.4pt}, %
+  mrk nodeb/.style={circle, inner sep=.6pt}, %
+  tsc pathb/.style={-{Stealth[length=2.5pt, width=2pt]}, line width=.3pt, shorten <=.4pt, shorten >=.4pt}, %
+}
+
+\newenvironment{dummy}{}{}
+
+\usepackage[active,tightpage]{preview}
+\PreviewEnvironment{dummy}
+\setlength\PreviewBorder{1pt}%
+
+\begin{document}
+
+\begin{dummy}
+\newcommand{\srs}{a}%
+\begin{tikzpicture}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% CHANGE INPUT FILE HERE
+\input{figs/trend-nbCooc-avg_hyp_NA-L_null-CB_x+i100.tikz}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\foreach \sm in {1,...,\nbs}{%
+  \ifnum\sm<\nbs%
+  \renewcommand{\srs}{b}%
+  \fi%
+\foreach \x [count=\xm] in {2,...,\nbt}{%
+  \pgfmathtruncatemacro{\cgrd}{100*(\nbt-\x)/17}%
+   \path[tsc path\srs] (s\sm_n\xm) edge[clsA\srs!\cgrd!clsZ\srs, opacity=.5] (s\sm_n\x);
+  }
+ \foreach \x in {1,...,\nbt}{
+    \pgfmathtruncatemacro{\cgrd}{100*(\nbt-\x)/17}%
+    \node[mrk node\srs, fill=clsA\srs!\cgrd!clsZ\srs] at (s\sm_n\x) {}; 
+  };
+}%
+\end{tikzpicture}
+\end{dummy}
+
+
+\begin{dummy}
+\newcommand{\srs}{a}%
+\begin{tikzpicture}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% CHANGE INPUT FILE HERE
+\input{figs/trend-nbCooc-avg_hyp_EU-L_null-CB_x+i100.tikz}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\foreach \sm in {1,...,\nbs}{%
+  \ifnum\sm<\nbs%
+  \renewcommand{\srs}{b}%
+  \fi%
+\foreach \x [count=\xm] in {2,...,\nbt}{%
+  \pgfmathtruncatemacro{\cgrd}{100*(\nbt-\x)/17}%
+   \path[tsc path\srs] (s\sm_n\xm) edge[clsA\srs!\cgrd!clsZ\srs, opacity=.5] (s\sm_n\x);
+  }
+ \foreach \x in {1,...,\nbt}{
+    \pgfmathtruncatemacro{\cgrd}{100*(\nbt-\x)/17}%
+    \node[mrk node\srs, fill=clsA\srs!\cgrd!clsZ\srs] at (s\sm_n\x) {}; 
+  };
+}%
+\end{tikzpicture}
+\end{dummy}
+
+\end{document}

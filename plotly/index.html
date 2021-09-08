@@ -1,0 +1,25 @@
+<head>
+  <meta charset="UTF-8">
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="./js-colormaps.js"></script>
+  <script src="./foci.js"></script>
+  <title>Map of fossils locations</title>
+  <link rel="stylesheet" type="text/css" href="mapFossils.css">
+</head>
+<body>
+  <div id="main">
+    <!-- <h2>Map of fossils locations</h2> -->    
+  <div id="choice-row">
+        Region: <select id="choice-region"> </select>
+        Fauna group: <select id="choice-fauna"> </select>
+        Focus: <select id="choice-focus"> </select>
+  </div>
+  
+  <div id="graph"></div>
+  </div>
+  <script src="mapFossilsCounts_plotly.js"></script>
+  <!--- <script src="mapFossilsAll_plotly.js"></script> --->
+  <!--- <script src="mapFossilsCounts_plotly.js"></script> --->
+  <!--- <script src="mapFossilsSites_plotly.js"></script> --->
+</body>

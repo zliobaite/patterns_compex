@@ -1,0 +1,145 @@
+\documentclass{article}
+
+%\usepackage[T1]{fontenc} 
+\usepackage[latin1]{inputenc}
+\usepackage[english]{babel}
+
+\usepackage[LY1]{fontenc}
+\usepackage{helvet}
+
+\bibliographystyle{plain}
+%\usepackage{emerald}
+\usepackage{pifont}
+\usepackage{siunitx}
+
+
+\usepackage{xcolor}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows, positioning, decorations.text, decorations.pathreplacing, calc, shapes, backgrounds}
+\usepackage{csvsimple}
+
+%%% Tikz style
+\tikzstyle{pil} = [style={|-|,thick,shorten <=.4pt,shorten >=.4pt}]
+
+% \tikzset{
+% node distance=.8cm,
+% ghost node/.style={text width=0cm, inner sep=0pt}, %, font=\scriptsize
+% root node/.style={circle, text width=0cm, inner sep=1.5pt, draw, align=center}, %, font=\scriptsize
+% main node/.style={circle, text width=0cm, inner sep=1.5pt, draw, fill=black, align=center}, %, font=\scriptsize
+% leaf node/.style={rectangle, text width=0cm, inner sep=1.5pt, draw, black, fill=black, align=center}, %, font=\scriptsize
+% label node/.style={text width=0.5cm, inner sep=2pt, align=center, node distance=.5cm, xshift=.3cm},
+% lterm node/.style={text width=0.5cm, inner sep=2pt, align=center, node distance=.3cm},
+% prop node/.style={text width=0.5cm, inner sep=2pt, align=center, node distance=.3cm, xshift=.2cm , color=darkgray},
+% pterm node/.style={text width=0.5cm, inner sep=2pt, align=center, node distance=.3cm, xshift=.2cm, color=darkgray},
+% cprop node/.style={text width=0.5cm, inner sep=2pt, align=center, node distance=.3cm, color=darkgray},
+% cpterm node/.style={text width=0.5cm, inner sep=2pt, align=center, node distance=.3cm, color=darkgray},
+% rep edge/.style={black, very thick},
+% lghost node/.style={text width=0cm, inner sep=0pt, color=white, opacity=0}, %, font=\scriptsize
+% lmain node/.style={inner sep=1pt, align=center, node distance=.35cm, fill=white, anchor=center},
+% li node/.style={inner sep=0pt, anchor=west, xshift=.08cm, yshift=.15cm, node distance=0cm, fill=white},
+% le node/.style={text width=1.9cm, inner sep=1pt, align=center, node distance=0cm, rotate=60, anchor=east, xshift=-1.2cm},
+% lleaf node/.style={text width=1.2cm, inner sep=1pt, align=center, node distance=0cm, rotate=60, anchor=east, xshift=-.8cm},
+% ptstart node/.style={inner sep=2pt, node distance=.12cm, align=left, anchor=west, font=\scriptsize\bf},
+% ptend node/.style={inner sep=2pt, node distance=.12cm, align=left, anchor=west, font=\scriptsize\bf},
+% dst node/.style={inner sep=1pt, align=left, text=darkgray, node distance=.05cm, anchor=west},
+% info node/.style={inner sep=1pt, align=left, text=darkgray, anchor=west},
+% info rec/.style={very thin, lightgray, fill=vlgray, opacity=0.25, rounded corners}
+% }
+
+% \definecolor{csCyP}{HTML}{4477AA} % blue
+% \definecolor{csCyD}{HTML}{332288} % blue
+% \definecolor{csCyR}{HTML}{117733} % green
+% \definecolor{csCyTo}{HTML}{CC6677} % yellow
+% \definecolor{csCyA}{HTML}{AA4499} % red
+\definecolor{dtls-gray}{HTML}{999933} % gray
+
+
+%% \ifpdf
+%%%% comment out to compile without caching tikz figures
+%%%% pdflatex --shell-escape standalone.tex
+% \usetikzlibrary{external}
+% \tikzexternalize[prefix=tikz/]
+%%% \tikzset{external/mode=list and make}
+%% \fi
+
+%% pdf2svg standalone-figure1.pdf patt1.svg
+
+\newenvironment{dummy}{}{}
+%%%<
+\usepackage[active,tightpage]{preview}
+%\PreviewEnvironment{tabular}
+\PreviewEnvironment{dummy}
+\setlength\PreviewBorder{1pt}%
+%%%>
+
+\begin{document}
+
+\begin{dummy}
+
+
+\begin{tikzpicture}
+
+\pgfmathsetmacro{\factX}{20}\pgfmathsetmacro{\offX}{0}%
+\pgfmathsetmacro{\factY}{1}\pgfmathsetmacro{\offY}{.1}%
+\pgfmathsetmacro{\vmin}{1}\pgfmathsetmacro{\vmax}{35}
+
+\clip (0,-2.5) rectangle (-20, 1.8);
+
+
+\foreach \l in {5,15,25}{
+\pgfmathsetmacro{\xf}{-(\l-\vmin)/(\vmax-\vmin)}%
+\pgfmathsetmacro{\xt}{-(\l+5-\vmin)/(\vmax-\vmin)}%
+\fill[black!20] (\factX*\xf,-.65) rectangle (\factX*\xt,.65);
+}
+\foreach \l in {0,10,20,30}{
+\pgfmathsetmacro{\xf}{-(\l-\vmin)/(\vmax-\vmin)}%
+\pgfmathsetmacro{\xt}{-(\l+5-\vmin)/(\vmax-\vmin)}%
+\fill[black!10] (\factX*\xf,-.65) rectangle (\factX*\xt,.65);
+}
+\foreach \l in {5,10,15,20,25,30}{
+\pgfmathsetmacro{\xf}{-(\l-\vmin)/(\vmax-\vmin)}%
+\node at (\factX*\xf,0) {\l~Ma};%
+}
+\pgfmathsetmacro{\countL}{0}%
+\csvreader[no head]{time-slices_america_filter.csv}{}{%
+% \pgfmathsetmacro{\cval}{\csvcolii}%
+% \pgfmathtruncatemacro{\y}{0.5}%\thecsvrow-2}%
+\pgfmathsetmacro{\countL}{\countL+1}%
+\pgfmathsetmacro{\y}{-.5}%\thecsvrow-2}%
+\pgfmathsetmacro{\xf}{-(\csvcolii-\vmin)/(\vmax-\vmin)}%
+\pgfmathsetmacro{\xt}{-(\csvcoliii-\vmin)/(\vmax-\vmin)}%
+\ifnum\thecsvrow=7%
+\pgfmathsetmacro{\lp}{0.7}%
+\else%
+\ifnum\thecsvrow=15%
+\pgfmathsetmacro{\lp}{0.35}%
+\else%
+\pgfmathsetmacro{\lp}{0.5}%
+\fi
+\fi
+% \node[ttsqr node, color=dtls-gray] (n_full_\nbr) at (\factX*\x,\factY*\y) {};%
+% \node (from_\countL) at (\factX*\xf,\factY*\y) {\csvcoli};%
+\path[pil] (\factX*\xf,\factY*\y) edge node[below, pos=\lp, rotate=35, anchor=north east, yshift=-2pt] {\csvcoli} (\factX*\xt,\factY*\y);
+}
+\csvreader[no head]{time-slices_europe_filter.csv}{}{%
+%\pgfmathsetmacro{\cval}{\csvcolii}%
+\pgfmathsetmacro{\countL}{\countL+1}%
+\pgfmathsetmacro{\y}{.5}%\thecsvrow-2}%
+\pgfmathsetmacro{\xf}{-(\csvcolii-\vmin)/(\vmax-\vmin)}%
+\pgfmathsetmacro{\xt}{-(\csvcoliii-\vmin)/(\vmax-\vmin)}%
+\path[pil] (\factX*\xf,\factY*\y) edge node[above, rotate=35, anchor=south west, yshift=2pt] {\csvcoli} (\factX*\xt,\factY*\y);
+}
+% %%%% labels
+  % \node[pterm node, text width=3cm, xshift=-.8em] (p21) [right of=b21, align=left, anchor=west] {\textcolor{csCyA}{wake up}};
+  % \path
+  %   (b0) edge (b21);
+\end{tikzpicture}
+\end{dummy}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

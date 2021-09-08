@@ -11,7 +11,8 @@
 - The `figures` folder containing supporting svg figures, prepared using the scripts
 - The `plotly` folder containing code for interactive plots of fossil locations
 - The `rnd_xps.zip` archive contains raw results from the randomization experiments with one thousand repetitions for each of the three null-models on the NOW database dump downloaded on November 25, 2020
-- The `appendix.pdf` contains supplementary information about the data and an exhaustive report of computational experiments
+- The `manuscript.pdf` file contains the main text
+- The `appendix.pdf` file contains supplementary information about the data and an exhaustive report of computational experiments
 - The `tikz_fig.tex` LaTeX file to compile tikz figures
 - The `README.md` file, this file
 

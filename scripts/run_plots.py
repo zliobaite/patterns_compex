@@ -32,7 +32,12 @@ parser.add_argument("-x", "--xps_folder", type=str, help="folder containing the 
 parser.add_argument("-z", "--xps_suffix", type=str, help="series suffix for the raw results", default="")
 parser.add_argument("-f", "--figs_folder", type=str, help="folder to store the figures", default="../figs/")
 parser.add_argument("-s", "--step", type=int, choices=list(range(nb_steps+1)), action='append', default=argparse.SUPPRESS, help="experiments step(s) figures should be plotted for")
-parser.add_argument('--svg', action='store_true', help="make svg bbl plots")
+group = parser.add_mutually_exclusive_group()
+group.add_argument('--bbl', action='store_true', dest="plot_bbl", help="make bbl plots (step 0)", default=argparse.SUPPRESS)
+group.add_argument('--no-bbl', action='store_false', dest="plot_bbl", default=argparse.SUPPRESS)
+group = parser.add_mutually_exclusive_group()
+group.add_argument('--svg', action='store_true', dest="svg_bbl", help="make svg bbl plots (step 0)", default=argparse.SUPPRESS)
+group.add_argument('--no-svg', action='store_false', dest="svg_bbl", default=argparse.SUPPRESS)
 
 for p in params.keys():
     parser.add_argument("-"+p[0], "--"+p, type=str, choices=list(params[p]), action='append', default=argparse.SUPPRESS, help=hlp[p])
@@ -115,6 +120,8 @@ for WHICH in params["continent"]:
         # OUTPUT FILES
         SSUFF = "%s-%s%s" % (WHICH, GROUP, params["xps_suffix"])
 
+        CSV_OUTLINE_FILE = FIGS_FLD+"outline_"+SSUFF+".csv"
+        TEX_LOCALITIES_FILE = FIGS_FLD+"localities_"+SSUFF+".tex"
         FIG_OSIMPLE_FILE = FIGS_FLD+"outline_simple_"+SSUFF+".pdf"
         # TAB_CNTO_FILE = FIGS_FLD+"cnt_"+SSUFF+".tex"
         TAB_CNTO_FILE = FIGS_FLD+"counts_"+SSUFF+".tex"
@@ -139,14 +146,15 @@ for WHICH in params["continent"]:
                           "LONG_MIN": -140, "LONG_MAX": -70,
                           "MIN_AGE_MIN": 2.5, "MAX_AGE_MAX": 34}
             MAX_RATIO_OUT = 0.1
-        else:
-            WHICH = "EU"
+        elif WHICH == "EU":
             LIST_FILE = DATA_FLD+"fossils_Europe-wide-%s.csv" % GROUP
             SLICES_FILE = TIMES_FLD+"time-slices_europe_filter.csv"
             BOUNDARIES = {"LAT_MIN": 14, "LAT_MAX": 82,
                           "LONG_MIN": -24, "LONG_MAX": 75,
                           "MIN_AGE_MIN": 2.5, "MAX_AGE_MAX": 23}
             MAX_RATIO_OUT = 0.1
+        else:
+            exit()
 
         FIELDS_SITES = ["LIDNUM", "NAME", "LAT", "LONG", "MAX_AGE", "MIN_AGE", "SLICE_ID", "SLICE_NAME", "MEAN_HYPSODONTY"]
         # FIELDS_SITES = ["LAT","LONG","MAX_AGE","MIN_AGE","SLICE_ID","SLICE_NAME"]
@@ -157,6 +165,7 @@ for WHICH in params["continent"]:
         FIELDS_FORMAT = {"LAT": float, "LONG": float, "MAX_AGE": float, "MIN_AGE": float, "SLICE_ID": int}
 
         fossils_data = ct.read_fossils(LIST_FILE, SLICES_FILE, FIELDS_FORMAT, FIELDS_SITES, FIELDS_SPECIES)
+        fossils_data.update({"WHICH": WHICH, "GROUP": GROUP})
         marg_species = numpy.sum(fossils_data["occurrences"], axis=0)
         sort_species = numpy.argsort(marg_species)
         marg_sites = numpy.sum(fossils_data["occurrences"], axis=1)
@@ -166,14 +175,16 @@ for WHICH in params["continent"]:
             print("--- bckg")
             #########################################################
             # FIGURES AND TABLES OF DATA CHARACTERISTICS
+            ct.save_outline(fossils_data, FIELDS_SPECIES, FIELDS_SITES, CSV_OUTLINE_FILE, tex_localities_file=TEX_LOCALITIES_FILE)
             # OUTLINES OF SITES SPANS IN TIME WITH HYP INFO, NOT SCALED TO TIME
             pt.plot_outline_simple(fossils_data, MAP_FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_OSIMPLE_FILE)
             # VARIOUS COUNTS
             pt.plot_counts_orders(fossils_data, FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_CNTO_FILE)
-            spc_counts, sliced_counts, sites_counts = ct.compute_counts(fossils_data, FIELDS_SPECIES, MAP_FIELDS_SITES)
-            pt.plot_bubbles_species(fossils_data, spc_counts, sliced_counts, MAP_FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_BBL_FILE, TEETH_FILE)
-            if params["svg"]:
-                pt.plot_bubbles_species(fossils_data, spc_counts, sliced_counts, MAP_FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_BBL_SVG, TEETH_FILE)
+            if params.get("plot_bbl", True):
+                spc_counts, sliced_counts, sites_counts = ct.compute_counts(fossils_data, FIELDS_SPECIES, MAP_FIELDS_SITES)
+                pt.plot_bubbles_species(fossils_data, spc_counts, sliced_counts, MAP_FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_BBL_FILE, TEETH_FILE)
+                if params.get("svg_bbl", True):
+                    pt.plot_bubbles_species(fossils_data, spc_counts, sliced_counts, MAP_FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_BBL_SVG, TEETH_FILE)
             # pt.plot_bubbles_species(fossils_data, spc_counts, sliced_counts, MAP_FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_BBLD_FILE, TEETH_FILE)
             # pt.plot_counts_species(fossils_data, spc_counts, sliced_counts, MAP_FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_CNTS_FILE)
             ct.table_counts(fossils_data, MAP_FIELDS_SPECIES, TAB_CNTO_FILE)

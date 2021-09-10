@@ -372,8 +372,46 @@ def write_fossils(fossils_data, list_file_out, fields_sites, fields_species):
         fo.write("\n".join(lines))
 
 
-def save_outline(fossils_data, fields_species, fields_sites, outline_file):
+LONG_PREAMBLE = """\\documentclass[10pt]{article}
 
+\\usepackage[utf8]{inputenc}
+\\usepackage[margin=1.5cm]{geometry}
+
+\\usepackage{booktabs}
+\\usepackage{longtable}
+%%\\input{../macros}
+\\newcommand{\groupNA}{NA}
+\\newcommand{\groupEU}{EU}
+\\newcommand{\groupL}{L}
+\\newcommand{\groupS}{S}
+\\newcommand{\groupC}{C}
+
+\\begin{document}
+
+\\begin{longtable}{@{\\hspace{5ex}}rl@{\\hspace{.8em}}r@{--}l@{\\hspace{2.5em}}r@{~;~}r@{\\hspace{3.em}}r@{\\hspace{1.5em}}r@{/}r@{/}r@{\\hspace{5ex}}}
+\\caption{%s} \\label{tab:%s} \\\\
+
+\\toprule \\multicolumn{2}{l}{\\textbf{Locality}} & \\multicolumn{2}{l}{\\textbf{Age (Ma)}} & \\multicolumn{2}{l}{\\textbf{Coordinates}} & \\multicolumn{1}{l}{\\textbf{H}} & \\multicolumn{3}{l}{\\textbf{Nbs}} \\\\[.8em] 
+\\endfirsthead
+
+\\multicolumn{10}{c}%%
+{{\\bfseries \\tablename\\ \\thetable{} -- continued from previous page}} \\\\
+\\multicolumn{2}{l}{\\textbf{Locality}} & \\multicolumn{2}{l}{\\textbf{Age}} & \\multicolumn{2}{l}{\\textbf{Coordinates}} & \\multicolumn{1}{l}{\\textbf{H}} & \\multicolumn{3}{l}{\\textbf{Nbs}} \\\\[.8em]
+\\endhead
+
+%%\\multicolumn{11}{r}{{Continued on next page}} \\\\
+%%\\endfoot
+
+\\bottomrule
+\\endlastfoot
+
+"""
+LONG_POSTAMBLE = "\\end{longtable}\n\\end{document}"  # \n%%% Local Variables:\n%%% mode: latex\n%%% TeX-master: t\n%%% End:"
+
+
+def save_outline(fossils_data, fields_species, fields_sites, outline_file, tex_localities_file=None):
+
+    whch, grp = (fossils_data["WHICH"], fossils_data["GROUP"])
     sites, sites_dict = (fossils_data["sites"], fossils_data["sites_dict"])
     species, species_dict = (fossils_data["species"], fossils_data["species_dict"])
     slices, sliced_sites_all = (fossils_data["slices"], fossils_data["sliced_sites"])
@@ -395,6 +433,10 @@ def save_outline(fossils_data, fields_species, fields_sites, outline_file):
 
     gens_to_ords = numpy.array([ords_map[s.split("_")[0]] for s in gens])
 
+    if tex_localities_file is not None:
+        sites_details, sites_by_slices = ({}, {})
+        site_id_field, site_slice_field = (fields_sites.index('LIDNUM'), fields_sites.index('SLICE_ID'))
+
     with open(outline_file, "w") as fo:
 
         fo.write(",".join(fields_sites + ["nb_orders", "nb_genera", "nb_spec", "nb_spec_all"] + ["%s_genera" % o for o in ords] + ords + gens + ["indet."]) + "\n")
@@ -413,6 +455,33 @@ def save_outline(fossils_data, fields_species, fields_sites, outline_file):
             Og = numpy.bincount(gens_to_ords[G[:-1] > 0], minlength=N_ords)
             T = [numpy.sum(O > 0), numpy.sum(G[:-1] > 0), numpy.sum(G[:-1]), numpy.sum(G)]
             fo.write(",".join(list(map(str, site)) + ["%d" % v for v in T] + ["%d" % v for v in Og] + ["%d" % v for v in O] + ["%d" % v for v in G]) + "\n")
+
+            if tex_localities_file is not None:
+                if site[site_slice_field] not in sites_by_slices:
+                    sites_by_slices[site[site_slice_field]] = []
+                sites_by_slices[site[site_slice_field]].append(site[site_id_field])
+                sites_details[site[site_id_field]] = dict(zip(*[fields_sites + ["nb_orders", "nb_genera", "nb_spec", "nb_spec_all"], list(site)+T]))
+
+    if tex_localities_file is not None:
+        with open(tex_localities_file, "w") as fo:
+
+            tlgd = "List of localities per time unit for \\group%s{}, \\group%s{}. The columns indicate the identifier and name of the locality, the age bounds, the coordinates (latitude; longitude), the average hypsodonty (H) as well as the number of distinct orders, of genera and of species recorded (Nbs)." % (whch, grp)
+            tlbl = "tab:locs-%s-%s" % (whch, grp)
+            fo.write(LONG_PREAMBLE % (tlgd, tlbl))
+
+            for si, slck in enumerate(sorted(sites_by_slices.keys())):
+                slc = slices[slck]
+                nb_locs = len(sites_by_slices[slck])
+                if si > 0:
+                    fo.write("[1.2em]")
+                fo.write(f"\n\\multicolumn{{2}}{{l}}{{\\qquad \\textbf{{ {slc[-1]} }} }} & {slc[0]:.2f} & {slc[1]:.2f} & \\multicolumn{{2}}{{l}}{{ {nb_locs} localities}} \\\\\n\\midrule\n")
+                for sk in sorted(sites_by_slices[slck]):
+                    site = sites_details[sk]
+                    site["NAMEb"] = site['NAME'].replace("&", "\\&")
+                    site["HYP"] = site['MEAN_HYPSODONTY'] if site['MEAN_HYPSODONTY'] != "\\N" else "-"
+                    fo.write(f"{site['LIDNUM']} & {site['NAMEb']} & {site['MAX_AGE']:.2f} & {site['MIN_AGE']:.2f} & {site['LAT']:.3f} & {site['LONG']:.3f} & {site['HYP']} & {site['nb_orders']} & {site['nb_genera']} & {site['nb_spec']} \\\\\n")
+
+            fo.write(LONG_POSTAMBLE)
 
 
 def read_teeth_details(teeth_file):
@@ -1395,7 +1464,7 @@ def get_statistics_details(group):
 
 
 def get_nullmodels_details():
-    rnd_subseries = {"UG": [], "CB": [], "shuffle": []} #, "sample": []}
+    rnd_subseries = {"UG": [], "CB": [], "shuffle": []}  # , "sample": []}
     for slc in ["+"]:  # , "-"]:
         rnd_subseries["UG"].extend(["null-UG_x%s" % slc])
         rnd_subseries["CB"].extend(["null-CB_x%si100" % slc])

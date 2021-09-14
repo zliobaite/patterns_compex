@@ -53,9 +53,9 @@
 
 Scalable vector graphics versions with species labels of Appendix Figures 1--6, i.e. distribution of species occurrences between different orders and genera over time, are available online:
 
-- [Europe, large herbivores](https://zliobaite.github.io/patterns_compex/main/figures/bbl-genO_EU-L.svg)
-- [Europe, small mammals](https://zliobaite.github.io/patterns_compex/main/figures/bbl-genO_EU-S.svg)
-- [Europe, large carnivorans](https://zliobaite.github.io/patterns_compex/main/figures/bbl-genO_EU-C.svg)
-- [North America, large herbivores](https://zliobaite.github.io/patterns_compex/main/figures/bbl-genO_NA-L.svg)
-- [North America, small mammals](https://zliobaite.github.io/patterns_compex/main/figures/bbl-genO_NA-S.svg)
-- [North America, large carnivorans](https://zliobaite.github.io/patterns_compex/main/figures/bbl-genO_NA-C.svg)
+- [Europe, large herbivores](https://zliobaite.github.io/patterns_compex/bbl-genO_EU-L.svg)
+- [Europe, small mammals](https://zliobaite.github.io/patterns_compex/bbl-genO_EU-S.svg)
+- [Europe, large carnivorans](https://zliobaite.github.io/patterns_compex/bbl-genO_EU-C.svg)
+- [North America, large herbivores](https://zliobaite.github.io/patterns_compex/bbl-genO_NA-L.svg)
+- [North America, small mammals](https://zliobaite.github.io/patterns_compex/bbl-genO_NA-S.svg)
+- [North America, large carnivorans](https://zliobaite.github.io/patterns_compex/bbl-genO_NA-C.svg)

@@ -8,9 +8,8 @@
 - The `scripts` folder contains the Python scripts for carrying out the computational experiments
 - The `times` folder contains files defining the time bins used in the experiments
 - The `db_dumps` folder can be used to store NOW database dump as csv files
-- The `figures` folder containing supporting svg figures, prepared using the scripts
 - The `localities` folder containing lists of fossil localities
-- The `plotly` folder containing code for interactive plots of fossil localities
+- The `docs` folder containing code for interactive plotly figures of fossil localities in space and time, as well as supporting svg figures, prepared using the scripts
 - The `rnd_xps.zip` archive contains raw results from the randomization experiments with one thousand repetitions for each of the three null-models on the NOW database dump downloaded on November 25, 2020
 - The `manuscript.pdf` file contains the main text
 - The `appendix.pdf` file contains supplementary information about the data and an exhaustive report of computational experiments

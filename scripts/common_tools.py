@@ -377,14 +377,13 @@ LONG_PREAMBLE = """\\documentclass[10pt]{article}
 \\usepackage[utf8]{inputenc}
 \\usepackage[margin=1.5cm]{geometry}
 
+\\usepackage[tablewithin=none,figurewithin=none,singlelinecheck=false]{caption}
 \\usepackage{booktabs}
 \\usepackage{longtable}
+\\usepackage{xifthen}
+\\usepackage{url}
 %%\\input{../macros}
-\\newcommand{\groupNA}{NA}
-\\newcommand{\groupEU}{EU}
-\\newcommand{\groupL}{L}
-\\newcommand{\groupS}{S}
-\\newcommand{\groupC}{C}
+\\newcommand{\groupNA}{NA}\\newcommand{\groupEU}{EU}\\newcommand{\groupL}{L}\\newcommand{\groupS}{S}\\newcommand{\groupC}{C}\\newcommand{\locUrl}[2]{#1,#2}
 
 \\begin{document}
 
@@ -465,7 +464,7 @@ def save_outline(fossils_data, fields_species, fields_sites, outline_file, tex_l
     if tex_localities_file is not None:
         with open(tex_localities_file, "w") as fo:
 
-            tlgd = "List of localities per time unit for \\group%s{}, \\group%s{}. The columns indicate the identifier and name of the locality, the age bounds, the coordinates (latitude; longitude), the average hypsodonty (H) as well as the number of distinct orders, of genera and of species recorded (Nbs)." % (whch, grp)
+            tlgd = "List of localities per time unit for \\group%s{}, \\group%s{}. The columns indicate the identifier and name of the locality, the age bounds, the coordinates (latitude; longitude), the average hypsodonty (H) as well as the number of distinct orders, of genera and of species recorded (Nbs). \\newline See corresponding figure at \\protect\\locUrl{%s}{%s}" % (whch, grp, whch, grp)
             tlbl = "tab:locs-%s-%s" % (whch, grp)
             fo.write(LONG_PREAMBLE % (tlgd, tlbl))
 

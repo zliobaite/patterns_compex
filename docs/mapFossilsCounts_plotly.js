@@ -1,4 +1,3 @@
-// var locfile = 'data/resorted_localities_more.csv';
 // var xpsfld = 'data/xps/';
 
 // COLORMAPPING
@@ -119,6 +118,7 @@ function assignOptions(textArray, selector) {
 function rtrnLoc(d, v_count, v_focus) {
     return {
         lidnum: +d.LIDNUM, // convert to number
+        lname: d.NAME, // 
         lat: +d.LAT, // convert to number
         lng: +d.LONG, // convert to number
         maxage: +d.MAX_AGE, // convert to number
@@ -129,10 +129,11 @@ function rtrnLoc(d, v_count, v_focus) {
     };
 }
 function prepareLocs(data, noiseLoc) {
-    var locs = {lidnum: [], lat: [], lng: [], maxage: [], minage: [], slice: [], vcount: [], vfocus: []};
+    var locs = {lidnum: [], lname: [], lat: [], lng: [], maxage: [], minage: [], slice: [], vcount: [], vfocus: []};
     for (var i = 1; i < data.length; i++) {
         var datum = data[i];
         locs.lidnum.push(datum.lidnum);
+        locs.lname.push(datum.lname);
         locs.lat.push(datum.lat + noiseLoc*Math.random());
         locs.lng.push(datum.lng + noiseLoc*Math.random());
         locs.maxage.push(datum.maxage);
@@ -180,6 +181,25 @@ function prepareLocsColors(dataClass, cparameters) {
     }
     return locsColors;
 }
+
+function prepareLocsSizes(dataClass, cparameters) {
+    var locsSizes = [];
+    var v_min = Math.min(...dataClass);
+    var v_max = Math.max(...dataClass);
+    // console.log(v_min, v_max);
+    if (v_max < 500) {
+        for (var i = 0; i < dataClass.length; i++) {
+            locsSizes[i] = cparameters["baseMrkSz"]+cparameters["fctMrkSz"]*(dataClass[i]-v_min)/(v_max-v_min);
+        }
+    } else {
+        for (var i = 0; i < dataClass.length; i++) {
+            locsSizes[i] = cparameters["baseMrkSz"]+Math.log2(2+dataClass[i]);
+        }
+    }
+
+    return locsSizes;
+}
+
 
 function prepareAges(locs){    
     ages = unionList(locs.maxage, locs.minage).sort(function(a, b){return b-a});
@@ -254,7 +274,7 @@ function makeSlider(ages, agesMap){
     return sliderSteps;
 }
 
-function makeTraces(locs, ordAges, locsColors, cparameters){
+function makeTraces(locs, ordAges, locsColors, locsSizes, cparameters){
     var frng = 0.012*Math.min(cparameters["xlims"][1]-cparameters["xlims"][0], cparameters["ylims"][1]-cparameters["ylims"][0]);
     idsMapAge = idsSorted(locs.maxage, locs.minage, locs.lat, locs.lng, locs.lidnum, locs.slice);
     var traces = {"mrk": [], "time": []}
@@ -263,28 +283,33 @@ function makeTraces(locs, ordAges, locsColors, cparameters){
         let cc = '#ffffff';
         traces["mrk"].push({lon: [xy_pin.x], 
                             lat: [xy_pin.y],                            
-                            text: [""+locs.lidnum[i]+" ("+cparameters["slice_names"][locs.slice[i]]+") "+cparameters["v_focus"]+"="+locs.vfocus[i]],
-                            //+"\n["+locs.maxage[i].toFixed(4)+","+locs.minage[i].toFixed(4)+"]"],
+                            text: ["<b>"+locs.lidnum[i]+" "+locs.lname[i]+"</b>"
+                                   +"<br><i>"+cparameters["slice_names"][locs.slice[i]]+"   ["+locs.maxage[i].toFixed(2)+"—"+locs.minage[i].toFixed(2)+"]</i>"
+                                   +"   <i>"+locs.lat[i].toFixed(3)+";"+locs.lng[i].toFixed(3)+"</i>"
+                                   +"<br>"+cparameters["v_focus"]+"="+locs.vfocus[i]],
                             visible: true,
                             type:'scattergeo',
                             mode:'markers',
                             name: "dot"+i,
                             marker: {
                                 // opacity : .66,
-                                color: [locsColors[i]],
-                                // size: baseMrkSz+Math.sqrt(locs.vcount[i])
-                                size: cparameters["baseMrkSz"]+Math.log2(2+locs.vcount[i])
+                                color: locsColors[i],
+                                size: locsSizes[i]
                             },
                             hoverinfo: "text",
                             showlegend: false
                            });
-        traces["time"].push({x: [ordAges[locs.maxage[i]]+cparameters["padT"], ordAges[locs.minage[i]]-cparameters["padT"]], 
+         // x: [ordAges[locs.maxage[i]]+cparameters["padT"], ordAges[locs.minage[i]]-cparameters["padT"]],                             
+        traces["time"].push({x: [ordAges[locs.maxage[i]], ordAges[locs.minage[i]]], 
                              y: [idsMapAge[i], idsMapAge[i]],
-                             text: [""+locs.lidnum[i]+" ("+locs.lat[i].toFixed(2)+","+locs.lng[i].toFixed(2)+") "+cparameters["v_focus"]+"="+locs.vfocus[i]],
+                             text: ["<b>"+locs.lidnum[i]+" "+locs.lname[i]+"</b>"
+                                   +"<br><i>"+cparameters["slice_names"][locs.slice[i]]+"   ["+locs.maxage[i].toFixed(2)+"—"+locs.minage[i].toFixed(2)+"]</i>"
+                                   +"   <i>"+locs.lat[i].toFixed(3)+";"+locs.lng[i].toFixed(3)+"</i>"
+                                   +"<br>"+cparameters["v_focus"]+"="+locs.vfocus[i]],
                              visible: true,
                              type:'scatter',
                              mode:'lines',
-                             name: "time"+i,                             
+                             name: "time"+i,
                              line: {
                                  color: locsColors[i],
                                  width: cparameters["baseLineW"]
@@ -302,6 +327,7 @@ function makeTraces(locs, ordAges, locsColors, cparameters){
 function makePlot(dataLocs, cparameters){    
     var fdims = cparameters["fdims"];
 
+    var highColor = cparameters["highColor"];
     var baseLineW = cparameters["baseLineW"];
     var baseMrkSz = cparameters["baseMrkSz"];
     var noiseLoc = cparameters["noiseLoc"];
@@ -317,26 +343,28 @@ function makePlot(dataLocs, cparameters){
     // prepare data
     locs = prepareLocs(dataLocs, noiseLoc);
     [ages, agesMap] = prepareAges(locs);
-
+    ageBounds = [ages[0], ages[ages.length-1]];
+    
     var ordAges = {}
     for (var i = 0; i < ages.length; i++) {
-        xx = (ages[i]-ages[0])/(ages[ages.length-1]-ages[0]);
+        xx = (ages[i]-ageBounds[0])/(ageBounds[1]-ageBounds[0]);
         ordAges[ages[i]] = xx;
         // tticks.push(xx);
         // ordAges[ages[i]] = i+1;
         // tticks.push(i+1);
         // ttickTxts.push(ages[i].toFixed(4));
     }
-    var tticks = [-padT];
+    var tticks = [];
     for (var i = 0; i < agesTicks.length; i++) {
-        tticks.push((agesTicks[i]-ages[0])/(ages[ages.length-1]-ages[0]));
+        tticks.push((agesTicks[i]-ageBounds[0])/(ageBounds[1]-ageBounds[0]));
     }
-    tticks.push(1+padT);
     locsColors = prepareLocsColors(locs.vfocus, cparameters);
+    locsSizes = prepareLocsSizes(locs.vcount, cparameters);
+    // console.log(locs.vcount, locsSizes);
     
     // prepare plot elements
     sliderSteps = makeSlider(ages, agesMap);
-    traces = makeTraces(locs, ordAges, locsColors, cparameters);
+    traces = makeTraces(locs, ordAges, locsColors, locsSizes, cparameters);
     
     var myPlot = document.getElementById('graph'),
         data = traces["mrk"].concat(traces["time"])
@@ -345,15 +373,16 @@ function makePlot(dataLocs, cparameters){
                   width: fdims[0],
                   height: fdims[1],
                   hovermode:'closest',
-                  grid: {rows: 2, columns: 1, pattern: 'independent'},
+                  grid: {rows: 3, columns: 1, pattern: 'independent'},
                   xaxis2: {
-                      anchor: 'y2', domain: [0, 1], range: [tticks[0], tticks[tticks.length-1]],
+                      anchor: 'y2', domain: [0, 1], range: [-padT, 1+padT], // tticks[0], tticks[tticks.length-1
                       tickmode: "array", tickvals: tticks, ticktext: ttickTxts,
-                      showgrid: true, showline: false, zeroline: false, showticklabels: true
+                      showgrid: true, showline: false, zeroline: false, showticklabels: true,
+                      rangeslider: {visible: false}
                   },
                   yaxis2: {
-                      anchor: 'x2', domain: [0, 0.44], // range: tlims,
-                      showgrid: false, showline: false, zeroline: false, showticklabels: false
+                      anchor: 'x2', domain: [0.1, 0.44], // range: tlims,
+                      showgrid: false, showline: false, zeroline: false, showticklabels: false, fixedrange: true
                   },
                   geo: {
                       scope: 'world',
@@ -366,7 +395,7 @@ function makePlot(dataLocs, cparameters){
                       showocean: true,
                       oceancolor: "#F9FCFF",
                       showcountries: true
-                  },
+                  }//,
                   // xaxis: {
                   //     showgrid: true,
                   //     gridwidth: 0.5,
@@ -379,16 +408,16 @@ function makePlot(dataLocs, cparameters){
                   //     range: ylims,
                   //     dtick: 5
                   // },
-                  sliders: [{
-                      pad: {l: 0, t: 40},
-                      currentvalue: {
-                          visible: true,
-                          prefix: 'Time (Ma): ',
-                          xanchor: 'left',
-                          font: {size: 20, color: '#6b6b6b'}
-                      },
-                      steps: sliderSteps
-                      }]
+                  // sliders: [{
+                  //     pad: {l: 0, t: 40},
+                  //     currentvalue: {
+                  //         visible: true,
+                  //         prefix: 'Time (Ma): ',
+                  //         xanchor: 'left',
+                  //         font: {size: 20, color: '#6b6b6b'}
+                  //     },
+                  //     steps: sliderSteps
+                  // }]
                   };
     config = {displaylogo: false,
               responsive: true,
@@ -408,6 +437,69 @@ function makePlot(dataLocs, cparameters){
              }
     
     Plotly.newPlot('graph', data, layout, config);
+
+    var idsM = [];
+    var idsT = [];
+    var statuses = [];
+    for (var i = 0; i < locs.lidnum.length; i++) {
+        idsM.push(i);
+        idsT.push(locs.lidnum.length+i);
+        statuses.push(0);
+    }
+    
+    function evFilterTime(dt, L, bounds, idsM, idsT){
+        var visM = [];
+        if ( "xaxis2.range[0]" in dt && "xaxis2.range[1]" in dt){            
+            if ( dt["xaxis2.range[0]"] > 0 && dt["xaxis2.range[1]"] < 1 && dt["xaxis2.range[0]"] < dt["xaxis2.range[1]"] ){
+                sbounds = [bounds[0]+(bounds[1]-bounds[0])*dt["xaxis2.range[0]"], bounds[0]+(bounds[1]-bounds[0])*dt["xaxis2.range[1]"]]
+                for (var i = 0; i < L.maxage.length; i++) {
+                    visM.push(L.minage[i] <= sbounds[0] && L.maxage[i] >= sbounds[1]);
+                }
+            } else {
+                for (var i = 0; i < L.maxage.length; i++) {
+                    visM.push(Boolean(1));
+                }
+            }
+            Plotly.restyle('graph', {'visible': visM}, idsM);
+        }
+    }
+
+    myPlot.on('plotly_relayout', function(data){ evFilterTime(data, locs, ageBounds, idsM, idsT); });
+
+    function evClickLoc(dt, locs, locsColors, locsSizes, ST){
+        var szM = [];
+        var idsM = [];
+        var szT = [];
+        var idsT = [];
+        var colMT = [];
+        for(var i=0; i < dt.points.length; i++){
+            bidsOn = getAssociatedIds(dt.points[i].curveNumber, locs.lidnum.length);
+            if ( bidsOn.length == 2 ){
+                if ( ST[bidsOn[0]] == 0 ){ // activate
+                    ST[bidsOn[0]] = 1;                     
+                    idsM.push(bidsOn[0]);
+                    idsT.push(bidsOn[1]);
+                    colMT.push(highColor);
+                    szM.push(4*baseMrkSz);
+                    szT.push(3*baseLineW);
+                } else { // deactivate
+                    idsM.push(bidsOn[0]);
+                    idsT.push(bidsOn[1]);
+                    colMT.push(locsColors[bidsOn[0]]);
+                    szM.push(locsSizes[bidsOn[0]]);
+                    szT.push(baseLineW);                    
+                }
+            }
+        }
+        if ( idsT.length > 0){
+            Plotly.restyle('graph', {'marker.color': colMT}, idsM);
+            Plotly.restyle('graph', {'marker.size': szM}, idsM);
+            Plotly.restyle('graph', {'line.color': colMT}, idsT);
+            Plotly.restyle('graph', {'line.width': szT}, idsT);
+        }
+    }
+
+    myPlot.on('plotly_click', function(data){ evClickLoc(data, locs, locsColors, locsSizes, statuses); });
 
     // function highlightOn(points, nbRows){
     //     for(var i=0; i < points.length; i++){
@@ -433,7 +525,7 @@ function makePlot(dataLocs, cparameters){
 
 function loadGraph(cparameters){
     // console.log(cparameters);
-    
+
     d3.csv(cparameters["locfile"], function (d) { return rtrnLoc(d, cparameters["v_count"], cparameters["v_focus"]) })
     .then(
         function(dataLocs){ makePlot(dataLocs, cparameters); },
@@ -479,7 +571,7 @@ function updateDataSrc(upRegion, upFauna, upFocus){
     var regionId = regionIdsMap[regionSelector.value];
     var faunaId = faunaIdsMap[faunaSelector.value];
     
-    var focusLbls = ["MEAN_HYPSODONTY"].concat(foci[regionId+"-"+faunaId]);
+    var focusLbls = ["MEAN_HYPSODONTY"].concat(extra_vars["header_"+regionId+"-"+faunaId]);
     if ( upRegion + upFauna > 0){
         clearOptions(focusSelector);
         assignOptions(focusLbls, focusSelector);
@@ -516,7 +608,9 @@ function updateDataSrc(upRegion, upFauna, upFocus){
     }
     
     var loc_parameters = {"fdims": [1200, 800],
+                          "highColor": "#BB0011",
                           "baseMrkSz": 3,
+                          "fctMrkSz": 7,
                           "noiseLoc": 0,
                           "padT": 0.001                          
                          }
@@ -532,19 +626,21 @@ function updateDataSrc(upRegion, upFauna, upFocus){
     
     loc_parameters["v_count"] = vcount;
     loc_parameters["locfile"] = "data/outline_"+regionId+"-"+faunaId+".csv";
+
+    // more extra variables
+    loc_parameters["xlims"] = extra_vars["xlims_"+regionId+"-"+faunaId];
+    loc_parameters["ylims"] = extra_vars["ylims_"+regionId+"-"+faunaId];
+    loc_parameters["slice_names"] = extra_vars["slice_names_"+regionId+"-"+faunaId];
+    loc_parameters["ttickTxts"] = extra_vars["ttickTxts_"+regionId+"-"+faunaId];
+    loc_parameters["agesTicks"] = extra_vars["agesTicks_"+regionId+"-"+faunaId];
+    
     if ( regionId == "EU" ) {
         loc_parameters["xlims"] = [ -15, 76];
         loc_parameters["ylims"] = [ 30, 60];
-        loc_parameters["slice_names"] = ["MN2", "MN3", "MN4","MN5", "MN6","MN7-8", "MN9", "MN10","MN11","MN12","MN13", "MN14","MN15", "MN16"];
-        loc_parameters["ttickTxts"] = ["","MN2","21","MN3", "18", "MN4","MN5", "15", "MN6","MN7-8","12", "MN9", "MN10","MN11","MN12","MN13", "6","MN14","MN15", "MN16", "3", ""];
-        loc_parameters["agesTicks"] = [21.7, 21, 19.5, 18, 17.2, 16.4, 15, 14.2,12.85, 12, 11.2, 9.9,8.9,7.6,7.1, 6, 5.3, 5, 3.55, 3];
         loc_parameters["baseLineW"] = .8;
     } else {
         loc_parameters["xlims"] = [ -130, -65];
         loc_parameters["ylims"] = [ 21, 86];
-        loc_parameters["slice_names"] = ["Orellan","Whitneyan", "Arikareean-1","Arikareean-2", "Arikareean-3","Arikareean-4","Hemingfordian-1","Hemingfordian-2","Barstovian-1","Barstovian-2", "Clarendonian-1","Clarendonian-2","Clarendonian-3","Hemphillian-1","Hemphillian-2","Hemphillian-3","Hemphillian-4","Blancan-Early"];
-        loc_parameters["ttickTxts"] = ["","Orellan","Whitneyan", "31","Arikareean-1","Arikareean-2", "25","Arikareean-3","Arikareean-4","Hemingfordian-1","Hemingfordian-2","Barstovian-1","Barstovian-2", "13", "Clarendonian-1","Clarendonian-2","Clarendonian-3","Hemphillian-1","Hemphillian-2","Hemphillian-3","Hemphillian-4","Blancan-Early","3", ""];
-        loc_parameters["agesTicks"] = [33.9,32.1, 31,29.75,28, 25,22.2,19.09,18.5,17.34,15.97,14.78,13, 12.57,12.11,10.09,9.07,7.59,6.88,5.91,4.91, 3];
         loc_parameters["baseLineW"] = 1.5;
     }
     loadGraph(loc_parameters);

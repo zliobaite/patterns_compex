@@ -3,20 +3,24 @@
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   <script src="./js-colormaps.js"></script>
-  <script src="./foci.js"></script>
-  <title>Map of fossils locations</title>
+  <script src="./extra_vars.js"></script>
+  <title>Fossils localities</title>
   <link rel="stylesheet" type="text/css" href="mapFossils.css">
 </head>
 <body>
   <div id="main">
-    <!-- <h2>Map of fossils locations</h2> -->    
   <div id="choice-row">
-        Region: <select id="choice-region"> </select>
-        Fauna group: <select id="choice-fauna"> </select>
-        Focus: <select id="choice-focus"> </select>
+        Continent: <select id="choice-region"> </select>
+        Faunal group: <select id="choice-fauna"> </select>
+        Focus variable: <select id="choice-focus"> </select>
   </div>
   
   <div id="graph"></div>
+    <!-- <h4>Map of fossils localities</h4> -->
+    <p>We show the fossil localities on a map (top) and on a timeline (bottom).<br>
+      Detailed information about a locality can be displayed by hovering over the corresponding dot on the map or the left-hand side extremity of the corresponding segment on the timeline.<br>
+      Localities can be highlighted across both views by clicking on the corresponding dot or segment end.<br>
+      Finally, localities can be filtered by selecting a time range on the timeline through clicking and dragging.</p>
   </div>
   <script src="mapFossilsCounts_plotly.js"></script>
   <!--- <script src="mapFossilsAll_plotly.js"></script> --->

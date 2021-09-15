@@ -408,7 +408,7 @@ LONG_PREAMBLE = """\\documentclass[10pt]{article}
 LONG_POSTAMBLE = "\\end{longtable}\n\\end{document}"  # \n%%% Local Variables:\n%%% mode: latex\n%%% TeX-master: t\n%%% End:"
 
 
-def save_outline(fossils_data, fields_species, fields_sites, outline_file, tex_localities_file=None):
+def save_outline(fossils_data, fields_species, fields_sites, boundaries, outline_file, tex_localities_file=None, plotly_vars_file=None):
 
     whch, grp = (fossils_data["WHICH"], fossils_data["GROUP"])
     sites, sites_dict = (fossils_data["sites"], fossils_data["sites_dict"])
@@ -436,9 +436,11 @@ def save_outline(fossils_data, fields_species, fields_sites, outline_file, tex_l
         sites_details, sites_by_slices = ({}, {})
         site_id_field, site_slice_field = (fields_sites.index('LIDNUM'), fields_sites.index('SLICE_ID'))
 
+    header = ";"
     with open(outline_file, "w") as fo:
 
-        fo.write(",".join(fields_sites + ["nb_orders", "nb_genera", "nb_spec", "nb_spec_all"] + ["%s_genera" % o for o in ords] + ords + gens + ["indet."]) + "\n")
+        header = ["nb_orders", "nb_genera", "nb_spec", "nb_spec_all"] + ["%s_genera" % o for o in ords] + ords + gens + ["indet."]
+        fo.write(",".join(fields_sites + header) + "\n")
 
         O = numpy.bincount(map_to_ord, minlength=N_ords)
         G = numpy.bincount(map_to_gen, minlength=N_gens+1)
@@ -460,6 +462,31 @@ def save_outline(fossils_data, fields_species, fields_sites, outline_file, tex_l
                     sites_by_slices[site[site_slice_field]] = []
                 sites_by_slices[site[site_slice_field]].append(site[site_id_field])
                 sites_details[site[site_id_field]] = dict(zip(*[fields_sites + ["nb_orders", "nb_genera", "nb_spec", "nb_spec_all"], list(site)+T]))
+
+    if plotly_vars_file is not None:
+        need_init = not os.path.exists(plotly_vars_file)
+        slice_names = []
+        ticks_v = []
+        ticks_l = []
+        for (v_max, v_min, lbl) in slices:
+            slice_names.append(lbl)
+            if len(ticks_v) == 0 or ticks_v[-1] != ("%.2f" % v_max):
+                ticks_v.append("%.2f" % v_max)
+                ticks_l.append("%.2f Ma" % v_max)
+            ticks_v.append("%.2f" % ((v_min+v_max)/2))
+            ticks_l.append("<b>%s</b>" % lbl)
+            ticks_v.append("%.2f" % v_min)
+            ticks_l.append("%.2f Ma" % v_min)
+
+        with open(plotly_vars_file, "a+") as fo:
+            if need_init:
+                fo.write("extra_vars = {}\n\n")
+            fo.write("extra_vars[\"header_%s-%s\"] = [\"%s\"]\n" % (whch, grp, "\", \"".join(header)))
+            fo.write("extra_vars[\"ylims_%s-%s\"] = [%.2f, %.2f]\n" % (whch, grp, boundaries["LAT_MIN"], boundaries["LAT_MAX"]))
+            fo.write("extra_vars[\"xlims_%s-%s\"] = [%.2f, %.2f]\n" % (whch, grp, boundaries["LONG_MIN"], boundaries["LONG_MAX"]))
+            fo.write("extra_vars[\"slice_names_%s-%s\"] = [\"%s\"]\n" % (whch, grp, "\", \"".join(slice_names)))
+            fo.write("extra_vars[\"ttickTxts_%s-%s\"] = [\"%s\"]\n" % (whch, grp, "\", \"".join(ticks_l)))
+            fo.write("extra_vars[\"agesTicks_%s-%s\"] = [%s]\n\n" % (whch, grp, ", ".join(ticks_v)))
 
     if tex_localities_file is not None:
         with open(tex_localities_file, "w") as fo:

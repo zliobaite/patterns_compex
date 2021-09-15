@@ -122,6 +122,7 @@ for WHICH in params["continent"]:
 
         CSV_OUTLINE_FILE = FIGS_FLD+"outline_"+SSUFF+".csv"
         TEX_LOCALITIES_FILE = FIGS_FLD+"localities_"+SSUFF+".tex"
+        PLOTLY_VARS_FILE = FIGS_FLD+"extra_vars.js"
         FIG_OSIMPLE_FILE = FIGS_FLD+"outline_simple_"+SSUFF+".pdf"
         # TAB_CNTO_FILE = FIGS_FLD+"cnt_"+SSUFF+".tex"
         TAB_CNTO_FILE = FIGS_FLD+"counts_"+SSUFF+".tex"
@@ -175,7 +176,7 @@ for WHICH in params["continent"]:
             print("--- bckg")
             #########################################################
             # FIGURES AND TABLES OF DATA CHARACTERISTICS
-            ct.save_outline(fossils_data, FIELDS_SPECIES, FIELDS_SITES, CSV_OUTLINE_FILE, tex_localities_file=TEX_LOCALITIES_FILE)
+            ct.save_outline(fossils_data, FIELDS_SPECIES, FIELDS_SITES, BOUNDARIES, CSV_OUTLINE_FILE, tex_localities_file=TEX_LOCALITIES_FILE, plotly_vars_file=PLOTLY_VARS_FILE)
             # OUTLINES OF SITES SPANS IN TIME WITH HYP INFO, NOT SCALED TO TIME
             pt.plot_outline_simple(fossils_data, MAP_FIELDS_SPECIES, MAP_FIELDS_SITES, FIG_OSIMPLE_FILE)
             # VARIOUS COUNTS

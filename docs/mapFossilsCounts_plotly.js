@@ -116,6 +116,14 @@ function assignOptions(textArray, selector) {
 // DATA TOOLS
 //---------------------------
 function rtrnLoc(d, v_count, v_focus) {
+    var vf = 0;
+    if (v_focus == "GENERAL") {
+        if (d[v_focus] == "y") {
+            vf = 1
+        }
+    } else {
+        vf = +d[v_focus] // convert to number
+    }
     return {
         lidnum: +d.LIDNUM, // convert to number
         lname: d.NAME, // 
@@ -125,7 +133,7 @@ function rtrnLoc(d, v_count, v_focus) {
         minage: +d.MIN_AGE, // convert to number
         slice: +d.SLICE_ID, // convert to number
         vcount: +d[v_count], // convert to number
-        vfocus: +d[v_focus] // convert to number
+        vfocus: vf // convert to number
     };
 }
 function prepareLocs(data, noiseLoc) {
@@ -571,7 +579,7 @@ function updateDataSrc(upRegion, upFauna, upFocus){
     var regionId = regionIdsMap[regionSelector.value];
     var faunaId = faunaIdsMap[faunaSelector.value];
     
-    var focusLbls = ["MEAN_HYPSODONTY"].concat(extra_vars["header_"+regionId+"-"+faunaId]);
+    var focusLbls = ["MEAN_HYPSODONTY", "GENERAL"].concat(extra_vars["header_"+regionId+"-"+faunaId]);
     if ( upRegion + upFauna > 0){
         clearOptions(focusSelector);
         assignOptions(focusLbls, focusSelector);

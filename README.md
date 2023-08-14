@@ -1,7 +1,7 @@
 # Patterns of Competitive Exclusion in the Mammalian Fossil Record, Support material
 
 ### Original article:
-*Patterns of Competitive Exclusion in the Mammalian Fossil Record*. Under review. NOW anniversary special volume.
+Galbrun, E., Hermansen, J.S., Žliobaitė, I. (2023). *Patterns of Competitive Exclusion in the Mammalian Fossil Record.* In: Casanovas-Vilar, I., van den Hoek Ostende, L.W., Janis, C.M., Saarinen, J. (eds) *Evolution of Cenozoic Land Mammal Faunas and Ecosystems.* Vertebrate Paleobiology and Paleoanthropology. Springer, Cham. <https://doi.org/10.1007/978-3-031-17491-9_9>
 
 Presented at the [Society of Vertebrate Paleontology (SVP)](https://vertpaleo.org/) [81st annual meeting](https://vertpaleo.org/wp-content/uploads/2021/10/SVP_2021_VirtualBook_final.pdf) (November 1-5, 2021)
 
